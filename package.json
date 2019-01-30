@@ -1,0 +1,53 @@
+{
+  "name": "Nextjs-Passport-MongoDB-TailwindCSS-Starter-Kit",
+  "version": "7.0.2",
+  "description": "Next.js, Passport.js, MongoDB, Tailwind CSS, Nodemon, Draft.js, Storybook, Swagger. Adapted from Iain Collins's nextjs-starter <https://github.com/iaincollins/nextjs-starter>.",
+  "author": "Galen Vinter <galen.vinter@gmail.com>",
+  "license": "ISC",
+  "repository": "",
+  "main": "index.js",
+  "dependencies": {
+    "@zeit/next-css": "^1.0.1",
+    "autoprefixer": "^9.4.5",
+    "babel-core": "^6.26.3",
+    "babel-plugin-wrap-in-js": "^1.1.1",
+    "connect-mongo": "^2.0.3",
+    "cssnano": "^4.1.8",
+    "dotenv": "^6.2.0",
+    "express-session": "^1.15.5",
+    "isomorphic-fetch": "^2.2.1",
+    "mongodb": "^3.1.10",
+    "nedb": "^1.8.0",
+    "next": "^7.0.2",
+    "next-auth": "^1.12.1",
+    "node-sass": "^4.11.0",
+    "nodemailer": "^4.7.0",
+    "nodemailer-direct-transport": "^3.3.2",
+    "nodemailer-smtp-transport": "^2.7.4",
+    "passport-facebook": "^2.1.1",
+    "passport-google-oauth": "^1.0.0",
+    "passport-twitter": "^1.0.4",
+    "postcss-easy-import": "^3.0.0",
+    "raw-loader": "^0.5.1",
+    "react": "^16.7.0",
+    "react-dom": "^16.7.0",
+    "sass-loader": "^7.1.0",
+    "tailwindcss": "^0.7.3",
+    "universal-cookie": "^3.0.7"
+  },
+  "devDependencies": {
+    "cross-env": "^5.1.6"
+  },
+  "optionalDependencies": {
+    "fsevents": "*"
+  },
+  "scripts": {
+    "dev": "NODE_ENV=development PORT=3000 nodemon index.js",
+    "build": "next build",
+    "start": "node index.js",
+    "postinstall": "next build"
+  },
+  "engines": {
+    "node": "8.11.x"
+  }
+}
