@@ -16,15 +16,27 @@ export default class {
     })
     .then(response => {
       if (response.ok) {
-        return Promise.resolve(response.json())
+        return response.json()
       } else {
-        return Promise.reject(Error('HTTP error when trying to list users'))
+        throw Error('HTTP error when trying to list users')
       }
     })
-    .then(data => {
-      return data
-    })
-    .catch(() => Promise.reject(Error('Error trying to list users')))
   }
 
+  // SAME THING
+  //
+  // static async list({
+  //   page = 0,
+  //   size = 10
+  // } = {}) {
+  //   const response = await fetch(`/api/admin/users?page=${page}&size=${size}`, {
+  //     credentials: 'same-origin'
+  //   });
+
+  //   if (response.ok) {
+  //     return response.json()
+  //   } else {
+  //     throw Error('HTTP error when trying to list users')
+  //   }
+  // }
 }

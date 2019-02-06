@@ -103,7 +103,7 @@ export default class extends Page {
       body: encodedForm
     })
     .then(async res => {
-      console.log('res: ',res)
+      // console.log('res: ',res.json)
       if (res.status === 200) {
         this.getProfile()
         this.setState({

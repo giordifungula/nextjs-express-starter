@@ -2,9 +2,10 @@
 
 const next = require('next')
 const nextAuth = require('next-auth')
-const nextAuthConfig = require('./next-auth.config')
+const nextAuthConfig = require('../next-auth.config')
 
 const apiRoutes = require("./routes/api");
+const webRoutes = require("./routes/web");
 
 // Load environment variables from .env file if present
 require('dotenv').load()
@@ -28,6 +29,7 @@ const nextApp = next({
   dev: (process.env.NODE_ENV === 'development')
 })
 
+
 // Add next-auth to next app
 nextApp
 .prepare()
@@ -40,22 +42,31 @@ nextApp
   // Note We do not pass a port in nextAuthOptions, because we want to add some
   // additional routes before Express starts (if you do pass a port, NextAuth
   // tells NextApp to handle default routing and starts Express automatically).
-  return nextAuth(nextApp, nextAuthOptions)
+  return nextAuth(nextApp, {
+    // csrf: false,
+    ...nextAuthOptions
+  })
 })
 .then(nextAuthOptions => {
   // Get Express and instance of Express from NextAuth
-  const express = nextAuthOptions.express
+  // const express = nextAuthOptions.express
   const expressApp = nextAuthOptions.expressApp
 
+  // Handle all /_next/ requests before nextAuth and sessions.
+  expressApp.all("/_next/*", (req, res) => {
+    let nextRequestHandler = nextApp.getRequestHandler();
+    return nextRequestHandler(req, res);
+  });
+
   // Web Routes
-  // webRoutes.forEach((router) => {
-  //   const { pattern, controller, middleware } = router;
-  //   // if (middleware) {
-  //   //   server.get(pattern, middleware, (req, res) => { controller(req, res, app); });
-  //   // } else {
-  //     expressApp.get(pattern, (req, res) => { controller(req, res, nextApp); });
-  //   // }
-  // });
+  webRoutes.forEach((router) => {
+    const { pattern, controller, middleware } = router;
+    // if (middleware) {
+    //   server.get(pattern, middleware, (req, res) => { controller(req, res, app); });
+    // } else {
+      expressApp.get(pattern, (req, res) => { controller(req, res, nextApp); });
+    // }
+  });
 
   // API Routes
   expressApp.use('/api', apiRoutes);
@@ -68,9 +79,9 @@ nextApp
 
   expressApp.listen(process.env.PORT, err => {
     if (err) throw err;
-    console.log("> Ready at: " + process.env.SERVER_URL);
-    console.log("> Listening on port:" + process.env.PORT);
-    console.log('> ENV: ', process.env.NODE_ENV);
+    console.log( "~~~ Ready at: " + process.env.SERVER_URL );
+    console.log( "~~~ Listening on port:" + process.env.PORT );
+    console.log( "~~~ env: ", process.env.NODE_ENV );
   });
 })
 .catch(err => {

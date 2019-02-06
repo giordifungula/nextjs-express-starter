@@ -1,3 +1,5 @@
+const usersCollection = require('./server/models/user');
+
 /**
  * next-auth.functions.js Example
  *
@@ -22,28 +24,12 @@
  *
  * Each function returns Promise.resolve() - or Promise.reject() on error.
  *
- * This specific example supports both MongoDB and NeDB, but can be refactored
- * to work with any database.
- *
- * Environment variables for this example:
- *
- * MONGO_URI=mongodb://localhost:27017/my-database
- * EMAIL_FROM=username@gmail.com
- * EMAIL_SERVER=smtp.gmail.com
- * EMAIL_PORT=465
- * EMAIL_USERNAME=username@gmail.com
- * EMAIL_PASSWORD=p4ssw0rd
- *
- * If you wish, you can put these in a `.env` to seperate your environment
- * specific configuration from your code.
  **/
 
 // Load environment variables from a .env file if one exists
 require('dotenv').load()
 
 // This config file uses MongoDB for User accounts, as well as session storage.
-// This config includes options for NeDB, which it defaults to if no DB URI
-// is specified. NeDB is an in-memory only database intended here for testing.
 const MongoClient = require('mongodb').MongoClient
 const MongoObjectId = (process.env.MONGO_URI) ? require('mongodb').ObjectId : (id) => { return id }
 
@@ -67,42 +53,30 @@ if (process.env.EMAIL_SERVER && process.env.EMAIL_USERNAME && process.env.EMAIL_
 }
 
 module.exports = () => {
-  return new Promise((resolve, reject) => {
-    if (process.env.MONGO_URI) {
-      // Connect to MongoDB Database and return user connection
-      MongoClient.connect(process.env.MONGO_URI, (err, mongoClient) => {
-        if (err) return reject(err)
-        const dbName = process.env.MONGO_URI.split('/').pop().split('?').shift()
-        const db = mongoClient.db(dbName)
-        return resolve(db.collection('users'))
-      })
-    }
-  })
-  .then(usersCollection => {
-    return Promise.resolve({
-      // If a user is not found find() should return null (with no error).
-      find: ({id, email, emailToken, provider} = {}) => {
-        let query = {}
+  return Promise.resolve({
+    // If a user is not found find() should return null (with no error).
+    find: ({id, email, emailToken, provider} = {}) => {
+      let query = {}
 
-        // Find needs to support looking up a user by ID, Email, Email Token,
-        // and Provider Name + Users ID for that Provider
-        if (id) {
-          query = { _id: MongoObjectId(id) }
-        } else if (email) {
-          query = { email: email }
-        } else if (emailToken) {
-          query = { emailToken: emailToken }
-        } else if (provider) {
-          query = { [`${provider.name}.id`]: provider.id }
-        }
+      // Find needs to support looking up a user by ID, Email, Email Token,
+      // and Provider Name + Users ID for that Provider
+      if (id) {
+        query = { _id: MongoObjectId(id) }
+      } else if (email) {
+        query = { email: email }
+      } else if (emailToken) {
+        query = { emailToken: emailToken }
+      } else if (provider) {
+        query = { [`${provider.name}.id`]: provider.id }
+      }
 
-        return new Promise((resolve, reject) => {
-          usersCollection.findOne(query, (err, user) => {
-            if (err) return reject(err)
-            return resolve(user)
-          })
+      return new Promise((resolve, reject) => {
+        usersCollection.findOne(query, (err, user) => {
+          if (err) return reject(err)
+          return resolve(user)
         })
-      },
+      })
+    },
       // The user parameter contains a basic user object to be added to the DB.
       // The oAuthProfile parameter is passed when signing in via oAuth.
       //
@@ -206,6 +180,6 @@ module.exports = () => {
           console.log('Generated sign in link ' + url + ' for ' + email)
         }
       },
-    })
+    // })
   })
 }

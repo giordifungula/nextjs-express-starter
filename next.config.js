@@ -6,14 +6,12 @@ const DIR = __dirname || './';
 module.exports = withCSS({
   webpack: (config, { buildId, dev, isServer, defaultLoaders }) => {
     config.resolve.alias = {
+      client: path.resolve(DIR, 'client'),
       components: path.resolve(DIR, 'components'),
       // config: path.resolve(__dirname, 'config'),
-      controllers: path.resolve(DIR, 'controllers'),
       // middleware: path.resolve(__dirname, 'middleware'),
-      models: path.resolve(DIR, 'models'),
-      node_modules: path.resolve(DIR, 'node_modules'),
-      // router: path.resolve(__dirname, 'server/routes'),
-      services: path.resolve(DIR, 'services'),
+      // node_modules: path.resolve(DIR, 'node_modules'),
+      server: path.resolve(DIR, 'server'),
       static: path.resolve(DIR, 'static'),
       styles: path.resolve(DIR, 'styles'),
       transformers: path.resolve(DIR, 'transformers'),

@@ -1,11 +1,11 @@
 {
   "name": "Nextjs-Passport-MongoDB-TailwindCSS-Starter-Kit",
-  "version": "7.0.2",
+  "version": "1.0.0",
   "description": "Next.js, Passport.js, MongoDB, Tailwind CSS, Nodemon, Draft.js, Storybook, Swagger. Adapted from Iain Collins's nextjs-starter <https://github.com/iaincollins/nextjs-starter>.",
   "author": "Galen Vinter <galen.vinter@gmail.com>",
   "license": "ISC",
   "repository": "",
-  "main": "index.js",
+  "main": "server/index.js",
   "dependencies": {
     "@zeit/next-css": "^1.0.1",
     "autoprefixer": "^9.4.5",
@@ -15,8 +15,10 @@
     "cssnano": "^4.1.8",
     "dotenv": "^6.2.0",
     "express-session": "^1.15.5",
+    "informed": "^1.10.12",
     "isomorphic-fetch": "^2.2.1",
     "mongodb": "^3.1.10",
+    "mongoose": "^5.4.8",
     "nedb": "^1.8.0",
     "next": "^7.0.2",
     "next-auth": "^1.12.1",
@@ -28,6 +30,7 @@
     "passport-google-oauth": "^1.0.0",
     "passport-twitter": "^1.0.4",
     "postcss-easy-import": "^3.0.0",
+    "prop-types": "^15.6.2",
     "raw-loader": "^0.5.1",
     "react": "^16.7.0",
     "react-dom": "^16.7.0",
@@ -42,7 +45,7 @@
     "fsevents": "*"
   },
   "scripts": {
-    "dev": "NODE_ENV=development PORT=3000 nodemon index.js",
+    "dev": "NODE_ENV=development PORT=3000 nodemon server/index.js",
     "build": "next build",
     "start": "node index.js",
     "postinstall": "next build"

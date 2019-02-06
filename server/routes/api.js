@@ -1,129 +1,78 @@
 const express = require('express');
 const router = express.Router();
-// const adventureService = require('./adventure');
-// const cloudinaryService = require('./cloudinary');
-// const userService = require('./user');
+const mongoose = require('mongoose');
+
+const TodoController = require('../controllers/todo');
+const ListController = require('../controllers/list');
 
 'use strict'
 
-const MongoClient = require('mongodb').MongoClient
+const mongoDB = process.env.MONGO_URI;
+mongoose.connect(mongoDB, { useNewUrlParser: true });
+mongoose.Promise = global.Promise;
+const db = mongoose.connection;
+db.on('error', console.error.bind(console, 'MongoDB connection error:'));
 
-let todosCollection
-let usersCollection
-if (process.env.MONGO_URI) {
-  // Connect to MongoDB Database and return todos connection
-  MongoClient.connect(process.env.MONGO_URI, (err, mongoClient) => {
-    if (err) throw new Error(err)
-    const dbName = process.env.MONGO_URI.split('/').pop().split('?').shift()
-    const db = mongoClient.db(dbName)
-    todosCollection = db.collection('todos')
-    usersCollection = db.collection('users')
-  })
-}
+// const usersCollection = db.collection('users')
 
 //
 // Todos
 //
 
-// Todos - find
+// Todos - list
 router.get('/todos', function(req, res) {
-
-  const page = (req.query.page && parseInt(req.query.page) > 0) ? parseInt(req.query.page) : 1
-  const sort = (req.query.sort) ? { [req.query.sort]: 1 } : {}
-
-  let size = 10
-  if (req.query.size
-      && parseInt(req.query.size) > 0
-      && parseInt(req.query.size) < 500) {
-    size = parseInt(req.query.size)
-  }
-
-  const skip = (size*(page-1) > 0) ? size*(page-1) : 0
-
-  let response = {
-    todos: [],
-    page: page,
-    size: size,
-    sort: req.params.sort,
-    total: 0
-  }
-
-  if (req.params.sort) response.sort = req.params.sort
-
-  let result
-  return new Promise(function(resolve, reject) {
-
-    result = todosCollection
-    .find()
-    .skip(skip)
-    .sort(sort)
-    .limit(size)
-
-    result.toArray((err, todos) => {
-      if (err) {
-        reject(err)
-      } else {
-        resolve(todos)
-      }
-    })
-  })
-  .then(todos => {
-    response.todos = todos
-    return result.count()
-  })
-  .then(count => {
-    response.total = count
-    return res.json(response)
-  })
-  .catch(err => {
-    return res.status(500).json(err)
-  })
-
+  return TodoController.list(req, res);
 });
 
-// Todos - insert
-router.post('/todo/new', function(req, res) {
-
-  const todo = req.body;
-  // console.log('req: ',req)
-  // console.log('todo: ',todo)
-
-  return new Promise((resolve, reject) => {
-    todosCollection.insert(todo, (err, response) => {
-      if (err) return reject(err)
-
-      // Mongo Client automatically adds an id to an inserted object, but
-      // if using a work-a-like we may need to add it from the response.
-      if (!todo._id && response._id) todo._id = response._id
-
-      return resolve(todo)
-    })
-  })
+// Todos - new
+router.post('/todo/create', function(req, res) {
+  return TodoController.create(req, res);
 });
-
 
 // Todos - update
-router.post('/todo/update', function(req, res) {
-
-  const todo = req.body;
-  // console.log('req: ',req)
-  // console.log('todo: ',todo)
-
-  return new Promise((resolve, reject) => {
-    todosCollection.updateOne(todo, (err, response) => {
-      if (err) return reject(err)
-
-      // Mongo Client automatically adds an id to an inserted object, but
-      // if using a work-a-like we may need to add it from the response.
-      if (!todo._id && response._id) todo._id = response._id
-
-      return resolve(todo)
-    })
-  })
+router.post('/todo/edit', function(req, res) {
+  return TodoController.update(req, res);
 });
 
-// Users
+// Todos - delete
+router.post('/todo/delete', function(req, res) {
+  return TodoController.delete(req, res);
+});
 
+
+//
+// Lists
+//
+
+// Lists - list
+router.get('/lists', function(req, res) {
+  return ListController.list(req, res);
+});
+
+// Lists - list
+router.get('/listById', function(req, res) {
+  return ListController.findOne(req, res);
+});
+
+// Lists - new
+router.post('/list/create', function(req, res) {
+  return ListController.create(req, res);
+});
+
+// Lists - update
+router.post('/list/edit', function(req, res) {
+  return ListController.update(req, res);
+});
+
+// Lists - delete
+router.post('/list/delete', function(req, res) {
+  return ListController.delete(req, res);
+});
+
+
+//
+// Users
+//
 router.get('/admin/users', (req, res) => {
 
   // Check user is logged in and has admin access
@@ -216,7 +165,7 @@ router.post('/account/user', (req, res) => {
       usersCollection.findOne({ _id: req.user.id })
       .then(user => {
 
-        console.log('user: ',user)
+        console.log('user: ', user)
 
         if (!user) return res.status(500).json({error: 'Unable to fetch profile'})
 
@@ -233,13 +182,17 @@ router.post('/account/user', (req, res) => {
         }
 
         console.log('updated user: ', user)
-        console.log('usersCollection.updateOne: ',usersCollection.updateOne)
-        return usersCollection.updateOne(user)
+        // console.log('usersCollection.updateOne: ',usersCollection.updateOne)
+        return usersCollection.updateOne({
+          _id: { $eq: user._id} },
+          user
+        )
       })
       .then(user => {
         return res.status(204).redirect('/account')
       })
       .catch(err => {
+        console.log('err: ',err)
         return res.status(500).json({error: 'Unable to fetch profile'})
       })
     })
